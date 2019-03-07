@@ -1,8 +1,8 @@
 <template>
-  <div id="app" v-on:click='addBallToStore($event)'>
+  <div id="app" v-on:click='addBallToStore({event:$event, quantity: 1, ballType: "big"})'>
     <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
     
-    <Ball v-for='ball in BALLS'  v-bind:mousePosition='ball.startPosition' v-bind:key='ball.key' v-bind:ballkey='ball.key' @remove='removeBallFromStore(ball.key)'/>
+    <Ball v-for='ball in BALLS'  v-bind:mousePosition='ball.startPosition' v-bind:key='ball.key' v-bind:ballkey='ball.key' @remove='removeBallFromStore(ball.key)' @combust='addBallToStore' v-bind:ballType='ball.ballType'/>
   </div>
 </template>
 

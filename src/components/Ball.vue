@@ -20,12 +20,15 @@ export default {
       width: 50,
       lastFrameTimeStamp: Date.now(),
       yVelocity: 0.018 * window.innerHeight,
+      xVelocity: 5,
       accel: 0.00,
       aFrame: 0,
+      ballSize: this.ballType
     }
   },
   props: {
     'mousePosition': Object,
+    'ballType': String
   },
   computed: {
     styleTest() {
@@ -41,14 +44,21 @@ export default {
   },
   mounted: function(){
     this.animatedMove()
-    console.log(typeof randomColor({format: 'hsla', alpha: 1}))
+    // console.log(typeof randomColor({format: 'hsla', alpha: 1}))
+
+    if(this.ballType == 'small')
+    {
+      this.yVelocity = 0.009 * window.innerHeight
+      this.xVelocity = Math.random() * (6 - 1) + 1
+      this.width = 20
+    }
   },
   methods: {
     moveRight: function() {
       if(this.movementRight){
-        this.positionX = this.positionX + 10;
+        this.positionX = this.positionX + this.xVelocity;
       }else{
-        this.positionX = this.positionX - 10;
+        this.positionX = this.positionX - this.xVelocity;
       }
     },
 
@@ -64,10 +74,18 @@ export default {
       // console.log(this.positionY, this.velocity)
       this.aFrame = requestAnimationFrame(this.animatedMove)
       
-      if( this.yVelocity < 0)
+      if( this.yVelocity < 0 && this.ballType == 'big')
+      {
+        this.removeBall()
+        this.$emit('combust', { event: {clientX: this.positionX, clientY: this.positionY}, quantity: Math.random() * (8 - 2) + 2, ballType: 'small' })
+      }
+
+      if( this.ballType == 'small' && this.positionY > (window.innerHeight - 200))
       {
         this.removeBall()
       }
+
+      // console.log(this.ballType, this.positionY)
     },
 
     checkPosition: function(){

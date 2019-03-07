@@ -18,12 +18,14 @@ export const store = new Vuex.Store({
   },
 
   mutations: {
-    addNewBall(state, mousePos){
-      state.balls.push(
-        {name: 'ball', startPosition: mousePos, key: "ballKey" + state.ballKey}
-      )
-
-      state.ballKey += 1
+    addNewBall(state, ballAttr){
+      // let quantityInt = parseInt(quantity)
+      for (let i = 0; i < ballAttr.quantity; i++) {
+        state.balls.push(
+          {name: 'ball', startPosition: ballAttr.mousePos, key: "ballKey" + state.ballKey, ballType: ballAttr.ballType}
+        )
+        state.ballKey += 1
+      }
     },
     removeBall(state, removeBallKey){
       var newState = state.balls.filter((ball) => {
@@ -36,12 +38,16 @@ export const store = new Vuex.Store({
 
   actions: {
     addBallToStore(context, event){
-      // console.log(event.clientX)
-      var mousePos = {
-        mouseX: event.clientX,
-        mouseY: event.clientY
+      // console.log(event)
+      var ballAttr = {
+        mousePos: {
+          mouseX: event.event.clientX,
+          mouseY: event.event.clientY
+        },
+        quantity: event.quantity,
+        ballType: event.ballType
       }
-      context.commit('addNewBall', mousePos)
+      context.commit('addNewBall', ballAttr)
     },
     removeBallFromStore(context, ballKey){
       context.commit('removeBall', ballKey)
