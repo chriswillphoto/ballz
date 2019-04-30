@@ -9,6 +9,14 @@ var coinflip = function(){
   return Math.random() >= 0.5 ? true : false
 }
 
+var randomVelocity = function() { 
+  var denom = Math.floor(Math.random() * (130 - 70 + 1) + 70);
+  console.log(denom)
+  return denom / 100
+}
+
+var gravityVar = 980
+
 export default {
   name: "Ball",
   data: function() {
@@ -17,11 +25,11 @@ export default {
       positionX: this.mousePosition.mouseX - 25,
       movementRight: coinflip(),
       positionY: this.mousePosition.mouseY - 25,
-      width: 50,
+      width: this.ballType == 'big' ? 40 : 20,
       lastFrameTimeStamp: Date.now(),
-      yVelocity: 0.018 * window.innerHeight,
-      xVelocity: 5,
-      accel: 0.00,
+      yVelocity: this.ballType == 'big' ? randomVelocity() * 0.8 * window.innerHeight : randomVelocity() * 0.15 * window.innerHeight,
+      xVelocity: Math.random() * (6 - 1) + 1,
+      accel: 0,
       aFrame: 0,
       ballSize: this.ballType
     }
@@ -45,13 +53,6 @@ export default {
   mounted: function(){
     this.animatedMove()
     // console.log(typeof randomColor({format: 'hsla', alpha: 1}))
-
-    if(this.ballType == 'small')
-    {
-      this.yVelocity = 0.009 * window.innerHeight
-      this.xVelocity = Math.random() * (6 - 1) + 1
-      this.width = 20
-    }
   },
   methods: {
     moveRight: function() {
@@ -66,11 +67,13 @@ export default {
       const timeStamp = Date.now()
       this.moveRight();
       this.accel = this.gravity(timeStamp);
-      this.yVelocity = this.yVelocity + this.accel;
+      this.yVelocity = this.velocityChange(timeStamp, this.yVelocity, this.accel)
+      console.log(this.yVelocity)
       this.checkPosition();
+      this.positionY = this.positionY - this.findDistance(timeStamp)
       this.lastFrameTimeStamp = timeStamp;
 
-      this.positionY = this.positionY - this.yVelocity
+    
       // console.log(this.positionY, this.velocity)
       this.aFrame = requestAnimationFrame(this.animatedMove)
       
@@ -80,7 +83,7 @@ export default {
         this.$emit('combust', { event: {clientX: this.positionX, clientY: this.positionY}, quantity: Math.random() * (8 - 2) + 2, ballType: 'small' })
       }
 
-      if( this.ballType == 'small' && this.positionY > (window.innerHeight - 200))
+      if( this.ballType == 'small' && this.positionY > (window.innerHeight - 5))
       {
         this.removeBall()
       }
@@ -97,9 +100,25 @@ export default {
 
     gravity: function(timeStamp) {
       const timeDiffInSecs = (timeStamp - this.lastFrameTimeStamp) / 1000;
-      const returnAccel = this.accel - (0.98 * timeDiffInSecs);
+      const returnAccel = this.accel - (gravityVar * timeDiffInSecs);
       
+      // console.log(returnAccel)
       return returnAccel
+      
+    },
+
+    velocityChange: function(timeStamp, velocity, accel){
+      const timeDiffInSecs = (timeStamp - this.lastFrameTimeStamp) / 1000
+      const returnVelocity = velocity + (accel * timeDiffInSecs)
+
+      return returnVelocity
+    },
+
+    findDistance: function(timeStamp){
+      const timeDiffInSecs = (timeStamp - this.lastFrameTimeStamp) / 1000
+      const returnDistance = (this.yVelocity * timeDiffInSecs)
+      // console.log(returnDistance)
+      return returnDistance
     },
 
     removeBall: function(){
